@@ -112,6 +112,7 @@ async function run() {
       }
     });
 
+    // update user
     app.put('/api/users',verifyFirebaseToken, async (req, res) => {
       try {
         const email = req.query.email;
