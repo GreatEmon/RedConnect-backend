@@ -479,7 +479,6 @@ async function run() {
     app.get("/api/blogs/:id", async (req, res) => {
       try {
         const { id } = req.params;
-        console.log(id)
         const blogs = await blogsCollection.find({ _id: new ObjectId(id) }).toArray();
         res.json(blogs);
       } catch (err) {
