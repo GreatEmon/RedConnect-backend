@@ -155,6 +155,7 @@ async function run() {
       }
     });
 
+    // get the reole(admin/volunteer/donor)
     app.get("/role",verifyFirebaseToken, async (req, res) => {
       const email = req.query.email;
 
