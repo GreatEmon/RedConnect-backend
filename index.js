@@ -6,6 +6,13 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express()
 const port = 3000
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 //URI
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ndbz4pp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
