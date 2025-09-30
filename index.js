@@ -91,6 +91,7 @@ async function run() {
       }
     });
 
+    //get user by email
     app.get('/api/users',verifyFirebaseToken, async (req, res) => {
       try {
         const email = req.query.email;
