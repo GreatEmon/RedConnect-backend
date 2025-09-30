@@ -582,7 +582,7 @@ async function run() {
       }
     });
 
-    app.post('/create-payment-intent',verifyFirebaseToken, async (req, res) => {
+    app.post('/create-payment-intent', async (req, res) => {
       try {
         const { amount } = req.body
         const paymentIntent = await stripe.paymentIntents.create({
@@ -600,11 +600,11 @@ async function run() {
       }
     });
 
-    app.get("/api/fundings",verifyFirebaseToken, async (req, res) => {
+    app.get("/api/fundings", async (req, res) => {
       try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
+        // const page = parseInt(req.query.page) || 1;
+        // const limit = parseInt(req.query.limit) || 10;
+        // const skip = (page - 1) * limit;
 
         const total = await fundingCollection.countDocuments();
         const totalFundsAgg = await fundingCollection
@@ -612,20 +612,17 @@ async function run() {
           .toArray();
         const totalFunds = totalFundsAgg[0]?.total || 0;
 
-        const fundings = await fundingCollection
-          .find({})
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .toArray();
-
+        const fundings = await fundingCollection.find({}).sort({ date: -1 }).toArray();
+          // .skip(skip)
+          // .limit(limit)
+          
 
         res.json({
           fundings,
           total,
-          totalFunds,
-          currentPage: page,
-          totalPages: Math.ceil(total / limit),
+          // totalFunds,
+          // currentPage: page,
+          // totalPages: Math.ceil(total / limit),
         });
       } catch (err) {
         console.error("Error fetching fundings:", err);
@@ -633,10 +630,11 @@ async function run() {
       }
     });
 
-    app.post("/api/fundings",verifyFirebaseToken, async (req, res) => {
+    app.post("/api/fundings", async (req, res) => {
       try {
         const funding = { ...req.body, date: new Date() };
         const result = await fundingCollection.insertOne(funding);
+        console.log(result)
         res.status(201).json({ success: true, fundingId: result.insertedId });
       } catch (err) {
         res.status(500).json({ success: false, message: err.message });
