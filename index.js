@@ -28,6 +28,15 @@ const client = new MongoClient(uri, {
   }
 });
 
+const verifyFirebaseToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization
+  const token = authHeader?.startsWith('Bearer ') && authHeader?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token provided' });
+  const decoded = await admin.auth().verifyIdToken(token);
+  req.user = decoded; // contains uid, email, etc.
+  next()
+}
+
 
 
 async function run() {
@@ -49,7 +58,6 @@ async function run() {
     app.get('/', async (req, res) => {
       res.send("the server is runnning")
     });
-
 
     // Register endpoint
     app.post('/api/users/register', async (req, res) => {
@@ -84,7 +92,7 @@ async function run() {
       }
     });
 
-    app.get('/api/users', async (req, res) => {
+    app.get('/api/users',verifyFirebaseToken, async (req, res) => {
       try {
         const email = req.query.email;
 
@@ -104,7 +112,7 @@ async function run() {
       }
     });
 
-    app.put('/api/users', async (req, res) => {
+    app.put('/api/users',verifyFirebaseToken, async (req, res) => {
       try {
         const email = req.query.email;
         const updateData = req.body;
@@ -134,7 +142,7 @@ async function run() {
       }
     });
 
-    app.get('/api/usersall', async (req, res) => {
+    app.get('/api/usersall',verifyFirebaseToken, async (req, res) => {
       try {
 
         const user = await usersCollection.find().toArray();
@@ -145,7 +153,7 @@ async function run() {
       }
     });
 
-    app.get("/role", async (req, res) => {
+    app.get("/role",verifyFirebaseToken, async (req, res) => {
       const email = req.query.email;
 
       if (!email) {
@@ -193,7 +201,7 @@ async function run() {
     });
 
     // Unblock a user
-    app.put("/api/unblock", async (req, res) => {
+    app.put("/api/unblock",verifyFirebaseToken, async (req, res) => {
       const email = req.query.email;
       if (!email) return res.status(400).json({ success: false, message: "Email is required" });
 
@@ -212,7 +220,7 @@ async function run() {
     });
 
     // Update user role
-    app.put("/api/role", async (req, res) => {
+    app.put("/api/role",verifyFirebaseToken, async (req, res) => {
       const email = req.query.email;
       const role = req.query.role;
       if (!email || !role) return res.status(400).json({ success: false, message: "Email and role are required" });
@@ -232,7 +240,7 @@ async function run() {
     });
 
 
-    app.post('/api/donation-requests', async (req, res) => {
+    app.post('/api/donation-requests',verifyFirebaseToken, async (req, res) => {
       try {
         const request = { ...req.body, createdAt: new Date() };
         const result = await donationsCollection.insertOne(request);
@@ -255,7 +263,7 @@ async function run() {
     });
 
     //get all
-    app.get('/api/donation-requestsall', async (req, res) => {
+    app.get('/api/donation-requestsall',verifyFirebaseToken, async (req, res) => {
       try {
         const requests = await donationsCollection.find({}).toArray();
         res.json(requests);
@@ -265,7 +273,7 @@ async function run() {
       }
     });
 
-    app.get("/api/donation-requests/:id", async (req, res) => {
+    app.get("/api/donation-requests/:id",verifyFirebaseToken, async (req, res) => {
       try {
         const { id } = req.params;
         const request = await donationsCollection.findOne({ _id: new ObjectId(id) });
@@ -280,7 +288,7 @@ async function run() {
     });
 
     // ✅ Confirm donation: set status to inprogress & add donor info
-    app.put("/api/donation-requests/:id/confirm", async (req, res) => {
+    app.put("/api/donation-requests/:id/confirm",verifyFirebaseToken, async (req, res) => {
       try {
         const { id } = req.params;
         const { donorName, donorEmail } = req.body;
@@ -316,7 +324,7 @@ async function run() {
 
     //change status 
     // ✅ Confirm donation: set status to inprogress & add donor info
-    app.put("/api/donation-requests/:id/status", async (req, res) => {
+    app.put("/api/donation-requests/:id/status",verifyFirebaseToken, async (req, res) => {
       try {
         const { id } = req.params;
         const { status } = req.body;
@@ -344,7 +352,7 @@ async function run() {
       }
     });
 
-    app.get("/api/recent", async (req, res) => {
+    app.get("/api/recent",verifyFirebaseToken, async (req, res) => {
       try {
         const { email } = req.query;
         if (!email) {
@@ -364,7 +372,7 @@ async function run() {
       }
     });
 
-    app.get("/api/recentall", async (req, res) => {
+    app.get("/api/recentall",verifyFirebaseToken, async (req, res) => {
       try {
         const { email } = req.query;
         if (!email) {
@@ -383,7 +391,7 @@ async function run() {
       }
     });
 
-    app.delete("/api/donation-requests/:id", async (req, res) => {
+    app.delete("/api/donation-requests/:id",verifyFirebaseToken, async (req, res) => {
       // <-- Make sure you set db in app.locals when connecting
       const { id } = req.params;
 
@@ -408,7 +416,7 @@ async function run() {
       }
     });
 
-    app.patch("/api/donation-requests/:id", async (req, res) => {
+    app.patch("/api/donation-requests/:id",verifyFirebaseToken, async (req, res) => {
       try {
         const { id } = req.params;
 
@@ -447,7 +455,7 @@ async function run() {
       }
     });
 
-    app.get("/api/admin/dashboard-stats", async (req, res) => {
+    app.get("/api/admin/dashboard-stats",verifyFirebaseToken, async (req, res) => {
       try {
         // total registered users (donors)
         const totalUsers = await usersCollection.countDocuments({ role: "donor" });
@@ -495,7 +503,7 @@ async function run() {
     });
 
     // POST a new blog
-    app.post("/api/blogs", async (req, res) => {
+    app.post("/api/blogs",verifyFirebaseToken, async (req, res) => {
       try {
         const blog = { ...req.body, createdAt: new Date() };
         const result = await blogsCollection.insertOne(blog);
@@ -507,7 +515,7 @@ async function run() {
     });
 
     // PUT update blog status (publish/unpublish)
-    app.put("/api/blogs/:id/status", async (req, res) => {
+    app.put("/api/blogs/:id/status",verifyFirebaseToken, async (req, res) => {
       const { id } = req.params;
       const { status } = req.body; // 'draft' or 'published'
       try {
@@ -523,7 +531,7 @@ async function run() {
     });
 
     // DELETE a blog
-    app.delete("/api/blogs/:id", async (req, res) => {
+    app.delete("/api/blogs/:id",verifyFirebaseToken, async (req, res) => {
       const { id } = req.params;
       try {
         await blogsCollection.deleteOne({ _id: new ObjectId(id) });
@@ -570,7 +578,7 @@ async function run() {
       }
     });
 
-    app.post('/create-payment-intent', async (req, res) => {
+    app.post('/create-payment-intent',verifyFirebaseToken, async (req, res) => {
       try {
         const { amount } = req.body
         const paymentIntent = await stripe.paymentIntents.create({
@@ -588,7 +596,7 @@ async function run() {
       }
     });
 
-    app.get("/api/fundings", async (req, res) => {
+    app.get("/api/fundings",verifyFirebaseToken, async (req, res) => {
       try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -621,7 +629,7 @@ async function run() {
       }
     });
 
-    app.post("/api/fundings", async (req, res) => {
+    app.post("/api/fundings",verifyFirebaseToken, async (req, res) => {
       try {
         const funding = { ...req.body, date: new Date() };
         const result = await fundingCollection.insertOne(funding);
@@ -631,7 +639,7 @@ async function run() {
       }
     });
 
-    app.get("/api/check-block", async (req, res) => {
+    app.get("/api/check-block",verifyFirebaseToken, async (req, res) => {
       try {
         const { email } = req.query;
         if (!email) {
