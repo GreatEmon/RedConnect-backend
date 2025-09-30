@@ -183,8 +183,9 @@ async function run() {
         console.error("Error fetching user role:", error);
         res.status(500).json({ success: false, message: "Server error" });
       }
-    });
+    });    
 
+    // Block a user
     app.put("/api/block", async (req, res) => {
       const email = req.query.email;
       if (!email) return res.status(400).json({ success: false, message: "Email is required" });
