@@ -143,6 +143,7 @@ async function run() {
       }
     });
 
+    // get all user
     app.get('/api/usersall',verifyFirebaseToken, async (req, res) => {
       try {
 
