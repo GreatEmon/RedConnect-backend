@@ -92,7 +92,7 @@ async function run() {
     });
 
     //get user by email
-    app.get('/api/users',verifyFirebaseToken, async (req, res) => {
+    app.get('/api/users', verifyFirebaseToken, async (req, res) => {
       try {
         const email = req.query.email;
 
@@ -113,7 +113,7 @@ async function run() {
     });
 
     // update user
-    app.put('/api/users',verifyFirebaseToken, async (req, res) => {
+    app.put('/api/users', verifyFirebaseToken, async (req, res) => {
       try {
         const email = req.query.email;
         const updateData = req.body;
@@ -144,7 +144,7 @@ async function run() {
     });
 
     // get all user
-    app.get('/api/usersall',verifyFirebaseToken, async (req, res) => {
+    app.get('/api/usersall', verifyFirebaseToken, async (req, res) => {
       try {
 
         const user = await usersCollection.find().toArray();
@@ -156,7 +156,7 @@ async function run() {
     });
 
     // get the reole(admin/volunteer/donor)
-    app.get("/role",verifyFirebaseToken, async (req, res) => {
+    app.get("/role", verifyFirebaseToken, async (req, res) => {
       const email = req.query.email;
 
       if (!email) {
@@ -183,7 +183,7 @@ async function run() {
         console.error("Error fetching user role:", error);
         res.status(500).json({ success: false, message: "Server error" });
       }
-    });    
+    });
 
     // Block a user
     app.put("/api/block", async (req, res) => {
@@ -205,7 +205,7 @@ async function run() {
     });
 
     // Unblock a user
-    app.put("/api/unblock",verifyFirebaseToken, async (req, res) => {
+    app.put("/api/unblock", async (req, res) => {
       const email = req.query.email;
       if (!email) return res.status(400).json({ success: false, message: "Email is required" });
 
@@ -224,7 +224,7 @@ async function run() {
     });
 
     // Update user role
-    app.put("/api/role",verifyFirebaseToken, async (req, res) => {
+    app.put("/api/role", async (req, res) => {
       const email = req.query.email;
       const role = req.query.role;
       if (!email || !role) return res.status(400).json({ success: false, message: "Email and role are required" });
@@ -244,7 +244,7 @@ async function run() {
     });
 
 
-    app.post('/api/donation-requests',verifyFirebaseToken, async (req, res) => {
+    app.post('/api/donation-requests', verifyFirebaseToken, async (req, res) => {
       try {
         const request = { ...req.body, createdAt: new Date() };
         const result = await donationsCollection.insertOne(request);
@@ -267,7 +267,7 @@ async function run() {
     });
 
     //get all
-    app.get('/api/donation-requestsall',verifyFirebaseToken, async (req, res) => {
+    app.get('/api/donation-requestsall', verifyFirebaseToken, async (req, res) => {
       try {
         const requests = await donationsCollection.find({}).toArray();
         res.json(requests);
@@ -277,7 +277,7 @@ async function run() {
       }
     });
 
-    app.get("/api/donation-requests/:id",verifyFirebaseToken, async (req, res) => {
+    app.get("/api/donation-requests/:id", verifyFirebaseToken, async (req, res) => {
       try {
         const { id } = req.params;
         const request = await donationsCollection.findOne({ _id: new ObjectId(id) });
@@ -292,7 +292,7 @@ async function run() {
     });
 
     // ✅ Confirm donation: set status to inprogress & add donor info
-    app.put("/api/donation-requests/:id/confirm",verifyFirebaseToken, async (req, res) => {
+    app.put("/api/donation-requests/:id/confirm", verifyFirebaseToken, async (req, res) => {
       try {
         const { id } = req.params;
         const { donorName, donorEmail } = req.body;
@@ -328,7 +328,7 @@ async function run() {
 
     //change status 
     // ✅ Confirm donation: set status to inprogress & add donor info
-    app.put("/api/donation-requests/:id/status",verifyFirebaseToken, async (req, res) => {
+    app.put("/api/donation-requests/:id/status", verifyFirebaseToken, async (req, res) => {
       try {
         const { id } = req.params;
         const { status } = req.body;
@@ -356,7 +356,7 @@ async function run() {
       }
     });
 
-    app.get("/api/recent",verifyFirebaseToken, async (req, res) => {
+    app.get("/api/recent", verifyFirebaseToken, async (req, res) => {
       try {
         const { email } = req.query;
         if (!email) {
@@ -376,7 +376,7 @@ async function run() {
       }
     });
 
-    app.get("/api/recentall",verifyFirebaseToken, async (req, res) => {
+    app.get("/api/recentall", verifyFirebaseToken, async (req, res) => {
       try {
         const { email } = req.query;
         if (!email) {
@@ -395,7 +395,7 @@ async function run() {
       }
     });
 
-    app.delete("/api/donation-requests/:id",verifyFirebaseToken, async (req, res) => {
+    app.delete("/api/donation-requests/:id", verifyFirebaseToken, async (req, res) => {
       // <-- Make sure you set db in app.locals when connecting
       const { id } = req.params;
 
@@ -420,7 +420,7 @@ async function run() {
       }
     });
 
-    app.patch("/api/donation-requests/:id",verifyFirebaseToken, async (req, res) => {
+    app.patch("/api/donation-requests/:id", verifyFirebaseToken, async (req, res) => {
       try {
         const { id } = req.params;
 
@@ -459,7 +459,7 @@ async function run() {
       }
     });
 
-    app.get("/api/admin/dashboard-stats",verifyFirebaseToken, async (req, res) => {
+    app.get("/api/admin/dashboard-stats", verifyFirebaseToken, async (req, res) => {
       try {
         // total registered users (donors)
         const totalUsers = await usersCollection.countDocuments({ role: "donor" });
@@ -507,7 +507,7 @@ async function run() {
     });
 
     // POST a new blog
-    app.post("/api/blogs",verifyFirebaseToken, async (req, res) => {
+    app.post("/api/blogs", verifyFirebaseToken, async (req, res) => {
       try {
         const blog = { ...req.body, createdAt: new Date() };
         const result = await blogsCollection.insertOne(blog);
@@ -519,7 +519,7 @@ async function run() {
     });
 
     // PUT update blog status (publish/unpublish)
-    app.put("/api/blogs/:id/status",verifyFirebaseToken, async (req, res) => {
+    app.put("/api/blogs/:id/status", verifyFirebaseToken, async (req, res) => {
       const { id } = req.params;
       const { status } = req.body; // 'draft' or 'published'
       try {
@@ -535,7 +535,7 @@ async function run() {
     });
 
     // DELETE a blog
-    app.delete("/api/blogs/:id",verifyFirebaseToken, async (req, res) => {
+    app.delete("/api/blogs/:id", verifyFirebaseToken, async (req, res) => {
       const { id } = req.params;
       try {
         await blogsCollection.deleteOne({ _id: new ObjectId(id) });
@@ -613,9 +613,9 @@ async function run() {
         const totalFunds = totalFundsAgg[0]?.total || 0;
 
         const fundings = await fundingCollection.find({}).sort({ date: -1 }).toArray();
-          // .skip(skip)
-          // .limit(limit)
-          
+        // .skip(skip)
+        // .limit(limit)
+
 
         res.json({
           fundings,
@@ -641,7 +641,7 @@ async function run() {
       }
     });
 
-    app.get("/api/check-block",verifyFirebaseToken, async (req, res) => {
+    app.get("/api/check-block", verifyFirebaseToken, async (req, res) => {
       try {
         const { email } = req.query;
         if (!email) {
@@ -664,6 +664,77 @@ async function run() {
         res.status(500).json({ error: "Server error" });
       }
     });
+
+    // GET donations
+    app.get("/api/donations", async (req, res) => {
+      try {
+        const donations = await fundingCollection.find().toArray();
+        res.status(200).json(donations);
+      } catch (error) {
+        console.error("❌ Error fetching donations:", error);
+        res.status(500).json({ error: "Failed to fetch donations" });
+      }
+    });
+
+    app.get("/api/blood-group-stats", async (req, res) => {
+      try {
+
+        // MongoDB aggregation
+        const result = await donationsCollection
+          .aggregate([
+            {
+              $group: {
+                _id: "$bloodGroup",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                bloodGroup: "$_id",
+                count: 1,
+              },
+            },
+            { $sort: { bloodGroup: 1 } },
+          ])
+          .toArray();
+
+        res.json(result);
+      } catch (error) {
+        console.error("Error fetching blood group stats:", error);
+        res.status(500).json({ error: "Failed to fetch data" });
+      }
+    });
+
+    app.get("/api/donation-status-summary", async (req, res) => {
+      try {
+
+        const result = await donationsCollection
+          .aggregate([
+            {
+              $group: {
+                _id: "$status",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                status: "$_id",
+                count: 1,
+              },
+            },
+            { $sort: { status: 1 } },
+          ])
+          .toArray();
+
+        res.json(result);
+      } catch (error) {
+        console.error("Error fetching donation status summary:", error);
+        res.status(500).json({ error: "Failed to fetch donation status summary" });
+      }
+    });
+
 
 
 
